@@ -1,0 +1,3 @@
+[submodule "NeurIPS2022-traffic4cast"]
+	path = NeurIPS2022-traffic4cast
+	url = https://github.com/iarai/NeurIPS2022-traffic4cast.git
