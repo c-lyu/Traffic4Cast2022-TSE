@@ -7,8 +7,7 @@ from functools import partial
 
 def config_sys_path(root_dir="."):
     root_dir = Path(root_dir)
-    sys.path.insert(0, os.path.abspath(root_dir / "NeurIPS2022-traffic4cast"))
-    sys.path.insert(1, os.path.abspath("."))
+    sys.path.insert(1, os.path.abspath(root_dir / "NeurIPS2022-traffic4cast"))
 
 
 def fill_zero(*args, **kwargs):

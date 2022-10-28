@@ -1,45 +1,26 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Sep 27 15:22:13 2022
-
-@author: superadmin
-"""
-
-
-import os
-import sys
-sys.path.insert(0, os.path.abspath("../../NeurIPS2022-traffic4cast"))  # noqa:E402
-sys.path.insert(1, os.path.abspath(".."))  # noqa:E402
-sys.path.insert(1, os.path.abspath("../.."))  # noqa:E402
-
-import numpy as np
-import pandas as pd
-from pathlib import Path
-from tqdm import tqdm
-import shutil
-
-from t4c22.t4c22_config import load_road_graph
-from src.utils.load import load_basedir
-import pyarrow as pa
-import pyarrow.parquet as pq
-from numpy import load
-import pandas
 import os
 import zipfile
+import argparse
+import shutil
+from pathlib import Path
 
-BASEDIR = load_basedir("../../../traffic4cast/T4C_INPUTS_2022")
-CACHEDIR = Path("../../cache")
-PROCESSED = "../../processed"
-SAVE_PROCESSED = "../../processed/test_outputs_eta"
-SUBMISSION = load_basedir("../../processed/submissions_eta")
+import pandas as pd
+from numpy import load
+from tqdm import tqdm
+import pyarrow as pa
+import pyarrow.parquet as pq
 
-submission_name = sys.argv[1]
+from t4c22.t4c22_config import load_road_graph
+from src.utils.load import cfg
 
-# df = pd.read_parquet('../../../traffic4cast/T4C_INPUTS_ETA_2022/road_graph/madrid/road_graph_supersegments.parquet')
+BASEDIR = cfg["BASEDIR"]
+CACHEDIR = cfg["CACHEDIR"]
+PROCESSED = cfg["PROCESSED"]
+SAVE_PROCESSED = PROCESSED / "test_output_eta"
+SUBMISSION = PROCESSED / "submission_eta"
 
 
-def write_df_to_parquet(df: pandas.DataFrame, fn: Path, compression="snappy"):
+def write_df_to_parquet(df: pd.DataFrame, fn: Path, compression="snappy"):
     table = pa.Table.from_pandas(df)
     pq.write_table(table, fn, compression=compression)
 
@@ -62,6 +43,12 @@ def make_submission_df_eta(city, base_dir, test_output_dir):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--submission_name", type=str, default="submission")
+
+    args = parser.parse_args()
+    submission_name = args.submission_name
+    
     cities  = ["london", "melbourne", "madrid"]
     for city in cities:
         df = make_submission_df_eta(city, BASEDIR, SAVE_PROCESSED)
@@ -74,7 +61,7 @@ if __name__ == "__main__":
             z.write(
                 filename=SUBMISSION / submission_name / city / "labels" / f"eta_labels_test.parquet",
                 arcname=os.path.join(city, "labels", f"eta_labels_test.parquet"),
-                )
+            )
     print(submission_zip)
     shutil.rmtree(SUBMISSION / submission_name)
 

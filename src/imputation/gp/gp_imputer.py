@@ -1,6 +1,3 @@
-from src.utils.miscs import config_sys_path
-config_sys_path(".")
-
 import warnings
 import numpy as np
 from tqdm import tqdm

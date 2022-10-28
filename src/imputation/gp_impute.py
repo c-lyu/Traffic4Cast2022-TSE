@@ -1,6 +1,3 @@
-from src.utils.miscs import config_sys_path
-config_sys_path(".")
-
 import argparse
 import logging
 import numpy as np
@@ -10,37 +7,24 @@ import pyarrow
 
 from t4c22.dataloading.t4c22_dataset import T4c22Dataset
 from t4c22.t4c22_config import load_road_graph
-
 from src.imputation.gp.gp_imputer import GaussianProcessImputer
-from src.utils.load import load_basedir, none_filter
+from src.utils.load import none_filter
 from src.utils.metrics import *
 from src.utils.logging import setup_logger
+from src.utils.load import cfg
 
+BASEDIR = cfg["BASEDIR"]
+CACHEDIR = cfg["CACHEDIR"]
+PROCESSED = cfg["PROCESSED"]
 
-# load BASEDIR from file, change to your data root
-# BASEDIR = load_basedir("C:/Users/user/Documents/Data/Traffic/Traffic4cast_2022/T4C_INPUTS_2022")
-# BASEDIR = load_basedir("/Users/mori/Codes/Data/IARAI/Traffic4cast2022/T4C_INPUTS_2022")
-# BASEDIR = load_basedir("../../../traffic4cast/T4C_INPUTS_2022")
-# CACHEDIR = Path("cache")
-BASEDIR = load_basedir(
-    "/dss/dssfs02/lwp-dss-0001/pr74mo/pr74mo-dss-0000/Traffic4cast2022/T4C_INPUTS_2022"
-)
-CACHEDIR = Path(
-    "/dss/dssfs02/lwp-dss-0001/pr74mo/pr74mo-dss-0000/Traffic4cast2022/cache"
-)
-
-# prepare cache folders
-Path(CACHEDIR / "train").mkdir(parents=True, exist_ok=True)
 Path(CACHEDIR / "impute").mkdir(parents=True, exist_ok=True)
-Path(CACHEDIR / "preprocessing").mkdir(parents=True, exist_ok=True)
-Path(CACHEDIR / "model").mkdir(parents=True, exist_ok=True)
 
 
 def impute_data(args, logger):
     city = args.city
 
     # load road graph
-    df_edges, df_nodes, _ = load_road_graph(BASEDIR, city)
+    _, df_nodes, _ = load_road_graph(BASEDIR, city)
     nodes_valid = df_nodes.counter_info.ne("")
 
     train_dataset = T4c22Dataset(

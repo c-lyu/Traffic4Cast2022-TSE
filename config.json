@@ -1,0 +1,5 @@
+{
+  "BASEDIR": "data",
+  "CACHEDIR": "cache",
+  "PROCESSED": "processed"
+}

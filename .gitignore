@@ -4,6 +4,7 @@ data/
 # Miscellaneous
 .DS_Store
 .vscode
+.trunk
 *.npz
 *.pckl
 *.npy

@@ -1,6 +1,3 @@
-from src.utils.miscs import config_sys_path
-config_sys_path(".")
-
 import numpy as np
 import torch
 import torch.nn.functional as F

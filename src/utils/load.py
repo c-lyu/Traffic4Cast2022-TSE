@@ -13,6 +13,27 @@ from t4c22.t4c22_config import load_road_graph
 from t4c22.t4c22_config import day_t_filter, DAY_T_FILTER
 
 
+def load_path_config(config: Union[Path, str]="config.json"):
+    """Load basic paths from config file.
+    
+    Parameters
+    ----------
+    config: path to config file; defaults to `Path("config.json")`
+    
+    Returns
+    -------
+    config: dict
+    """
+    config = Path(config) if isinstance(config, str) else config
+    config = json.load(open(config))
+    for k, v in config.items():
+        config[k] = Path(v)
+    return config
+
+
+cfg = load_path_config()
+
+
 def load_basedir(fn: Union[Path, str] = None, pkg=t4c22) -> Path:
     """Load t4c22 data basedir from central config file.
 
@@ -88,7 +109,7 @@ class SkipDayFilter(DAY_T_FILTER):
 
 
 class SkipDayDaytimeFilter(DAY_T_FILTER):
-    """A Day T Filter for interwoven selection of dates at daytime.
+    """A Day T Filter for interweaving selection of dates at daytime.
 
     Parameters
     ----------
