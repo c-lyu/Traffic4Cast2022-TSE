@@ -1,6 +1,13 @@
+# data
+data/
+
 # Miscellaneous
 .DS_Store
 .vscode
+*.npz
+*.pckl
+*.npy
+*.parquet
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
