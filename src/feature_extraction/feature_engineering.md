@@ -5,7 +5,7 @@
   - [Static network features](#static-network-features)
   - [Loop counts features](#loop-counts-features)
   - [Speed features](#speed-features)
-  - [$k$-nn label features](#k-nn-label-features)
+  - [KNN label features](#knn-label-features)
   - [Feature combination](#feature-combination)
 
 ### Prerequisites
