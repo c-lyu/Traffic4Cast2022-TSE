@@ -26,7 +26,7 @@ See `static_features.py`.
 - Haversine distance between SG OD
 - For SG i: Shortest/design travel time = $\sum_{j \in SG_i} \frac{\text{length}_j}{\text{MaxSpeed}_j}$
 - Statistics of the $y$ values of all samples under consideration (all nn)
-- Percentage of ($-\infty$, 1800], (1800, 2400] and (2400, $\infty$) in the y query set for each SG
+- Percentage of $(- \infty, 1800]$, $(1800, 2400]$ and $(2400, \infty)$ in the y query set for each SG
 
 ### Loop counts features
 
@@ -42,7 +42,7 @@ See `speed_features_fully.py`. Free flow speed and median speed of a SG is defin
 - Mean, std of the free flow speed, median speed of $k$ nearest neighbors
 - Mean, std of the edge volume classes percentage/distribution of $k$ nearest neighbors
 
-### $k$-nn label features
+### KNN label features
 
 See `knn_features_eng.py` and `knn_features_manipulate.py`. $k \in [2,5,10,30,50,100]$ below.
 
