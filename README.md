@@ -12,6 +12,7 @@ Solution of team TSE to NeurIPS2022-Traffic4cast Challenge
     - [Speed features](#speed-features)
     - [KNN label features](#knn-label-features)
     - [Feature combination](#feature-combination)
+  - [Report](#report)
   - [Citation](#citation)
   - [Acknowledgements](#acknowledgements)
 
@@ -19,7 +20,7 @@ Solution of team TSE to NeurIPS2022-Traffic4cast Challenge
 ## Installation
 
 Necessary packages needed for running the scripts are included in `requirements.txt`.
-In addition, the official t4c package have to be installed in advance.
+In addition, the [official t4c package](https://github.com/iarai/NeurIPS2022-traffic4cast) have to be installed in advance.
 
 ```bash
 pip install -r requirements.txt
@@ -27,7 +28,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-The scripts used for data imputation, data preparation, feature extraction and model prediction are included in `run.sh`.
+The scripts used for data imputation, data preparation, feature extraction and model training & prediction are included in `run.sh`. Before running the scripts, please configure the paths in `config.json`.
 
 ```bash
 sh run.sh
@@ -94,6 +95,10 @@ See `knn_features_eng.py` and `knn_features_manipulate.py`. $k \in [2,5,10,30,50
 ### Feature combination
 We also combine (difference, addition, quotient) multiple aforementioned features together to construct more powerful features. This step is carried on in the model training script.
 
+
+## Report
+
+The accompanying technique report can be found in [Traffic4cast_2022_TSE.pdf](https://github.com/c-lyu/Traffic4Cast2022-TSE/blob/main/Traffic4cast_2022_TSE.pdf).
 
 ## Citation
 
