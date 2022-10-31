@@ -12,7 +12,6 @@ from src.feature_extraction.read_knn_features import (
 from src.feature_extraction.feature_combination import feature_combine
 from src.utils.load import cfg
 
-CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
 SAVE_PROCESSED = PROCESSED / "test_outputs_eta"
 
@@ -23,23 +22,23 @@ num_val = 500
 loss_train = []
 loss_val = []
 for city in cities:
-    x_static = pd.read_parquet(PROCESSED + "/" + city + "/x_static_eta.parquet")
+    x_static = pd.read_parquet(PROCESSED / city / "x_static_eta.parquet")
     x_static["sg_id"] = x_static.index
     x_static = x_static.to_numpy()
-    x_allnn = np.load(PROCESSED + "/" + city + "/knn_eng_allnn.npz")["arr_0"]
+    x_allnn = np.load(PROCESSED / city / "knn_eng_allnn.npz")["arr_0"]
     x_static = np.concatenate([x_static, x_allnn], axis=1)  # add all nn as a feature
 
-    y = np.load(PROCESSED + "/" + city + "/y_eta.npz")["arr_0"]
+    y = np.load(PROCESSED / city / "y_eta.npz")["arr_0"]
     y = np.reshape(y, (-1, len(x_static)))
     y_hist_mean = np.mean(y, axis=0)
     # y = y - y_hist_mean
 
-    x_nodes = np.load(PROCESSED + "/" + city + "/x_nodes_eta.npz")["arr_0"]
+    x_nodes = np.load(PROCESSED / city / "x_nodes_eta.npz")["arr_0"]
     # knn features
     ks = [5, 10, 30, 50, 100]
-    x_knn1 = read_knn_features(PROCESSED, city, ks, "train", y.shape, p="p1", zone="")
+    x_knn1 = read_knn_features(PROCESSED, city, ks, "train", y.shape, p="p1")
     # p2 knn features
-    x_knn2 = read_knn_features(PROCESSED, city, ks, "train", y.shape, p="p2", zone="")
+    x_knn2 = read_knn_features(PROCESSED, city, ks, "train", y.shape, p="p2")
 
     x_static_train = np.repeat(x_static[None, :], len(y), axis=0)
     # supersegment speed statistics
@@ -53,7 +52,7 @@ for city in cities:
     gc.collect()
 
     if city == "london":
-        num_nan_raw = np.load(PROCESSED + "/london/" + "nan_percent_all.npy")
+        num_nan_raw = np.load(PROCESSED / city / "nan_percent_all.npy")
         x_all = x_all[num_nan_raw < 80]
         y = y[num_nan_raw < 80]
 
@@ -138,14 +137,14 @@ for city in cities:
     x_train.columns, x_val.columns = col_name, col_name
 
     x_static_test = np.repeat(x_static[None, :], 100, axis=0)
-    x_nodes_test = np.load(PROCESSED + "/" + city + "/x_nodes_test_eta.npz")["arr_0"]
+    x_nodes_test = np.load(PROCESSED / city / "x_nodes_test_eta.npz")["arr_0"]
 
     ks = [5, 10, 30, 50, 100]
     x_knn_test1 = read_knn_features(
-        PROCESSED, city, ks, "test", y.shape, p="p1", zone=""
+        PROCESSED, city, ks, "test", y.shape, p="p1"
     )
     x_knn_test2 = read_knn_features(
-        PROCESSED, city, ks, "test", y.shape, p="p2", zone=""
+        PROCESSED, city, ks, "test", y.shape, p="p2"
     )
 
     # supersegment speed statistics
@@ -200,19 +199,19 @@ for city in cities:
 
     loss_train.append(lgb_model.evals_result_["train"]["l1"][-1])
     loss_val.append(lgb_model.evals_result_["valid"]["l1"][-1])
-    joblib.dump(lgb_model, PROCESSED + "/checkpoints/lgb_1+2_model_%s.pkl" % city)
+    joblib.dump(lgb_model, PROCESSED / "checkpoints" / f"lgb_1+2_model_{city}.pkl")
 
     # make prediction
     y_hat = lgb_model.predict(x_test)
     y_hat = y_hat.reshape((100, -1))
 
     if city == "london":
-        y_missing = np.load(PROCESSED + "/london_missing_y_eta_hat.npz")["arr_0"]
-        x_error, x_correct = pd.read_pickle(PROCESSED + "/london/error_index.pckl")
+        y_missing = np.load(PROCESSED / "london_missing_y_eta_hat.npz")["arr_0"]
+        x_error, x_correct = pd.read_pickle(PROCESSED / city / "error_index.pckl")
         for i in range(6):
             y_hat[x_error[i]] = y_missing[i]
 
-    np.savez_compressed(SAVE_PROCESSED + "/" + city + "/" + "y_eta_hat", y_hat)
+    np.savez_compressed(SAVE_PROCESSED / city / "y_eta_hat.npz", y_hat)
 
 print("Train Loss: ", loss_train)
 print("Mean of train loss: %.2f", sum(loss_train) / 3)

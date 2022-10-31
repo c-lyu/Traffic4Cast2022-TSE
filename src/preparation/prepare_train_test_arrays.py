@@ -71,9 +71,9 @@ for city in cities:
         [X_raw_support[i][valid_node_indices] for i in range(len(X_raw_support))]
     )
 
-    savez_compressed(PROCESSED + "/" + city + "/" + "X", X_support)
-    savez_compressed(PROCESSED + "/" + city + "/" + "X_raw", X_raw_support)
-    savez_compressed(PROCESSED + "/" + city + "/" + "y_eta", y_support)
+    savez_compressed(PROCESSED / city / "X.npz", X_support)
+    savez_compressed(PROCESSED / city / "X_raw.npz", X_raw_support)
+    savez_compressed(PROCESSED / city / "y_eta.npz", y_support)
 
 
 for city in cities:
@@ -90,4 +90,4 @@ for city in cities:
 
     X_test = np.asarray([x[nodes_valid].numpy() for x, _ in tqdm(test_dataset)])
 
-    savez_compressed(PROCESSED + "/" + city + "/" + "X_test", X_test)
+    savez_compressed(PROCESSED / city / "X_test.npz", X_test)

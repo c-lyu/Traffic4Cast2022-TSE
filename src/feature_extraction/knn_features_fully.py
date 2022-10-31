@@ -5,7 +5,6 @@ from sklearn.neighbors import NearestNeighbors
 
 from src.utils.load import cfg
 
-CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
 
 
@@ -45,18 +44,17 @@ def construct_knn_features(args, ks):
     print("===Preparing knn features for %s..." % args.city)
     print("- consider k in ", ks)
     num_t_per_day = 64
-    x_impute = np.load(PROCESSED + "/" + args.city + "/X.npz")["arr_0"]
-    y = np.load(PROCESSED + "/" + args.city + "/y_eta.npz")["arr_0"]
+    x_impute = np.load(PROCESSED / args.city / "X.npz")["arr_0"]
+    y = np.load(PROCESSED / args.city / "y_eta.npz")["arr_0"]
     y = np.reshape(y, (len(x_impute), -1))
 
-    x_test = np.load(PROCESSED + "/" + args.city + "/X_test.npz")["arr_0"][:100]
+    x_test = np.load(PROCESSED / args.city / "X_test.npz")["arr_0"][:100]
     x_test = np.reshape(x_test, (x_test.shape[0], 4 * x_test.shape[1]))
 
     num_days = int(len(x_impute) / num_t_per_day)
-    num_sg = y.shape[1]
     k_collect = []
 
-    print("- generate knn y_eta features for trainnning data")
+    print("- generate knn y_eta features for training data")
     for d in tqdm(range(num_days)):
         x_support = np.concatenate(
             (x_impute[: d * num_t_per_day], x_impute[(d + 1) * num_t_per_day :]), axis=0
@@ -66,7 +64,6 @@ def construct_knn_features(args, ks):
         y_support = np.concatenate(
             (y[: d * num_t_per_day], y[(d + 1) * num_t_per_day :]), axis=0
         )
-        y_train = y[d * num_t_per_day : (d + 1) * num_t_per_day]
 
         x_support = np.reshape(x_support, (x_support.shape[0], 4 * x_support.shape[1]))
         x_support = np.nan_to_num(x_support, nan=0)
@@ -97,13 +94,13 @@ def construct_knn_features(args, ks):
         x_tmp = k_collect[:, i, :, :]
         x_knn = np.concatenate(x_tmp)
         np.savez_compressed(
-            f"{PROCESSED}/{args.city}/knn_eng_train_p/{args.knn_p}{k}.npz", x_knn
+            f"{PROCESSED}/{args.city}/knn_eng_train_p{args.knn_p}{k}.npz", x_knn
         )
 
         nbrs = knn.kneighbors(x_test, n_neighbors=k, return_distance=False)
         x_tmp = create_features(y, nbrs, k)
         np.savez_compressed(
-            f"{PROCESSED}/{args.city}/knn_eng_test_p/{args.knn_p}{k}.npz", x_tmp
+            f"{PROCESSED}/{args.city}/knn_eng_test_p{args.knn_p}{k}.npz", x_tmp
         )
 
 

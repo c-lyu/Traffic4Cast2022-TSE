@@ -8,7 +8,6 @@ from t4c22.t4c22_config import load_road_graph
 from src.utils.load import cfg
 
 BASEDIR = cfg["BASEDIR"]
-CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
 SPEED_FOLDER = BASEDIR / "speed_classes"
 
@@ -58,7 +57,7 @@ def cal_speed_features(args, ks):
         rgss_df = pd.concat([rgss_df, pd.DataFrame(supersegments)["edges"]], axis=1)
         df_edges["edge"] = df_edges[["u", "v"]].apply(tuple, axis=1)
 
-        x_speed = np.load(PROCESSED + "/" + args.city + "/" + "x_speed.npz")["arr_0"]
+        x_speed = np.load(PROCESSED / args.city / "x_speed.npz")["arr_0"]
         sg_speed = []
         vcs = []
         for i, sg in tqdm(rgss_df.iterrows(), total=len(rgss_df)):
@@ -71,19 +70,18 @@ def cal_speed_features(args, ks):
         vcs = np.transpose(np.stack(vcs), (1, 0, 2))
         sg_speed = np.concatenate((sg_speed, vcs), axis=2)
 
-        np.savez_compressed(PROCESSED + "/" + args.city + "/x_sg.npz", sg_speed)
+        np.savez_compressed(PROCESSED / args.city / "x_sg.npz", sg_speed)
     else:
-        sg_speed = np.load(PROCESSED + "/" + args.city + "/x_sg.npz")["arr_0"]
+        sg_speed = np.load(PROCESSED / args.city / "x_sg.npz")["arr_0"]
 
-    x_impute = np.load(PROCESSED + "/" + args.city + "/X.npz")["arr_0"]
-    y_eta = np.load(PROCESSED + "/" + args.city + "/y_eta.npz")["arr_0"]
+    x_impute = np.load(PROCESSED / args.city / "X.npz")["arr_0"]
+    y_eta = np.load(PROCESSED / args.city / "y_eta.npz")["arr_0"]
     y_eta = np.reshape(y_eta, (len(x_impute), -1))
 
-    x_test = np.load(PROCESSED + "/" + args.city + "/X_test.npz")["arr_0"][:100]
+    x_test = np.load(PROCESSED / args.city / "X_test.npz")["arr_0"][:100]
     x_test = np.reshape(x_test, (x_test.shape[0], 4 * x_test.shape[1]))
 
     num_days = int(len(x_impute) / num_t_per_day)
-    num_sg = y_eta.shape[1]
     k_collect = []
     print("\n- generate knn speed features for trainning data")
     for d in tqdm(range(num_days)):
@@ -91,11 +89,6 @@ def cal_speed_features(args, ks):
             (x_impute[: d * num_t_per_day], x_impute[(d + 1) * num_t_per_day :]), axis=0
         )
         x_train = x_impute[d * num_t_per_day : (d + 1) * num_t_per_day]
-
-        y_support = np.concatenate(
-            (y_eta[: d * num_t_per_day], y_eta[(d + 1) * num_t_per_day :]), axis=0
-        )
-        y_train = y_eta[d * num_t_per_day : (d + 1) * num_t_per_day]
 
         x_support = np.reshape(x_support, (x_support.shape[0], 4 * x_support.shape[1]))
         x_support = np.nan_to_num(x_support, nan=0)

@@ -2,19 +2,14 @@ import numpy as np
 import pandas as pd
 import pickle
 import random
-from pathlib import Path
 
-from src.utils.load import load_basedir
 from src.feature_extraction.read_knn_features import (
     read_knn_features,
     read_speed_features,
 )
-from src.feature_extraction.feature_combination import feature_combine
+from src.utils.load import cfg
 
-BASEDIR = load_basedir("data")
-CACHEDIR = Path("cache")
-PROCESSED = "processed"
-SAVE_PROCESSED = "processed/test_outputs_eta"
+PROCESSED = cfg["PROCESSED"]
 
 city = "london"
 num_t_per_day = 64
@@ -23,15 +18,15 @@ num_val = 0
 p_knn = "p1"
 p_speed = "p1"
 
-x_static = pd.read_parquet(PROCESSED + "/" + city + "/x_static_eta.parquet")
+x_static = pd.read_parquet(PROCESSED / city / "x_static_eta.parquet")
 x_static["sg_id"] = x_static.index
 x_static = x_static.to_numpy()
-x_allnn = np.load(PROCESSED + "/" + city + "/knn_eng_allnn_missing.npz")["arr_0"]
+x_allnn = np.load(PROCESSED / city / "knn_eng_allnn_missing.npz")["arr_0"]
 x_static = np.concatenate([x_static, x_allnn], axis=1)  # add all nn as a feature
 
-y = np.load(PROCESSED + "/" + city + "/y_train_eta_missing.npz")["arr_0"]
+y = np.load(PROCESSED / city / "y_train_eta_missing.npz")["arr_0"]
 
-x_nodes = np.load(PROCESSED + "/" + city + "/x_nodes_eta_missing.npz")["arr_0"]
+x_nodes = np.load(PROCESSED / city / "x_nodes_eta_missing.npz")["arr_0"]
 x_static_train = np.repeat(x_static[None, :], len(y), axis=0)
 # knn features
 ks = [2, 5, 10, 30, 50, 100]
@@ -122,7 +117,7 @@ col_name = y_cols + static_cols + dynamic_cols + speed_cols
 # x_train.columns,x_val.columns = col_name,col_name
 x_train.columns = col_name
 
-x_nodes_test = np.load(PROCESSED + "/" + city + "/x_nodes_test_eta.npz")["arr_0"]
+x_nodes_test = np.load(PROCESSED / city / "x_nodes_test_eta.npz")["arr_0"]
 x_static_test = np.repeat(x_static[None, :], 100, axis=0)
 
 ks = [2, 5, 10, 30, 50, 100]
@@ -138,7 +133,7 @@ x_sg_speed = read_speed_features(
 x_test = np.concatenate((x_knn_test, x_static_test, x_nodes_test, x_sg_speed), axis=2)
 del x_nodes_test, x_static_test, x_knn_test, x_static, x_sg_speed
 
-x_error, x_correct = pd.read_pickle(PROCESSED + "/london/error_index.pckl")
+x_error, x_correct = pd.read_pickle(PROCESSED / city / "error_index.pckl")
 x_test = x_test[x_error]
 
 x_test = np.concatenate(x_test)
@@ -146,7 +141,7 @@ x_test = np.concatenate(x_test)
 x_test = pd.DataFrame(x_test)
 x_test.columns = col_name
 
-f = open(PROCESSED + "/london/missing_df_" + p_knn + ".pckl", "wb")
+f = open(PROCESSED / city / f"missing_df_{p_knn}.pckl", "wb")
 # pickle.dump([x_train, y_train, x_val, y_val, x_test, weights], f)
 pickle.dump([x_train, y_train, x_test], f)
 f.close()

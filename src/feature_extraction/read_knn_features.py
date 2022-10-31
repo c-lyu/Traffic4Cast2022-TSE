@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def read_knn_features(path, city, ks, obj, shape, p, zone="", missing=False):
+def read_knn_features(path, city, ks, obj, shape, p, missing=False):
     knn_eng = []
     for k in ks:
         if missing:
@@ -9,7 +9,7 @@ def read_knn_features(path, city, ks, obj, shape, p, zone="", missing=False):
                 "arr_0"
             ]
         else:
-            features = np.load(f"{path}/{city}/knn_eng_{obj}_{p}{k}{zone}.npz")["arr_0"]
+            features = np.load(f"{path}/{city}/knn_eng_{obj}_{p}{k}.npz")["arr_0"]
         knn_eng.append(features)
     knn_features = np.concatenate(knn_eng, axis=1)
     if obj == "train":

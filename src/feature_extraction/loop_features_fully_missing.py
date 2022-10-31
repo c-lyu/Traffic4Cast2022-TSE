@@ -5,9 +5,7 @@ from t4c22.t4c22_config import load_road_graph
 from src.utils.load import cfg
 
 BASEDIR = cfg["BASEDIR"]
-CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
-road_graph_folder = BASEDIR / "road_graphs"
 
 
 def loop_statistics(args):
@@ -15,12 +13,12 @@ def loop_statistics(args):
         "===Preparing %s... calculate_missing=%s, construct_test=%s"
         % (args.city, args.calculate_missing, args.construct_test)
     )
-    x_impute = np.load(PROCESSED + "/" + args.city + "/X.npz")["arr_0"]
+    x_impute = np.load(PROCESSED / args.city / "X.npz")["arr_0"]
     if args.calculate_missing & (args.city == "london"):
-        num_nan_raw = np.load(PROCESSED + "/london/" + "nan_percent_all.npy")
+        num_nan_raw = np.load(PROCESSED / args.city / "nan_percent_all.npy")
         x_impute = x_impute[num_nan_raw > 80]
 
-    x_test = np.load(PROCESSED + "/" + args.city + "/X_test.npz")["arr_0"][:100]
+    x_test = np.load(PROCESSED / args.city / "X_test.npz")["arr_0"][:100]
 
     df_edges, df_nodes, rgss_df = load_road_graph(
         BASEDIR, args.city, skip_supersegments=False
@@ -48,12 +46,12 @@ def loop_statistics(args):
     num_valid = np.transpose(np.stack(num_valid), (1, 0, 2))
 
     x_nodes = np.concatenate((df_sum, df_mean, df_std, num_valid), axis=2)
-    if args.calculate_missing:
+    if args.calculate_missing & (args.city == "london"):
         np.savez_compressed(
-            PROCESSED + "/" + args.city + "/x_nodes_eta_missing.npz", x_nodes
+            PROCESSED / args.city / "x_nodes_eta_missing.npz", x_nodes
         )
     else:
-        np.savez_compressed(PROCESSED + "/" + args.city + "/x_nodes_eta.npz", x_nodes)
+        np.savez_compressed(PROCESSED / args.city / "x_nodes_eta.npz", x_nodes)
 
     # for test data
     if args.construct_test:
@@ -76,7 +74,7 @@ def loop_statistics(args):
 
         x_nodes = np.concatenate((df_sum, df_mean, df_std, num_valid), axis=2)
         np.savez_compressed(
-            PROCESSED + "/" + args.city + "/x_nodes_test_eta.npz", x_nodes
+            PROCESSED / args.city / "x_nodes_test_eta.npz", x_nodes
         )
 
 

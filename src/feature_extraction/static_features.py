@@ -9,8 +9,6 @@ from src.utils.load import cfg
 BASEDIR = cfg["BASEDIR"]
 CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
-road_graph_folder = BASEDIR / "road_graph"
-
 
 def edge_stat(row, df_edges, speed_limit_field):
     edge_list = [e["edge"] for e in row["edges"]]
@@ -120,7 +118,7 @@ def get_network_static(args):
         lambda x: sum([e["length"] / e["max_speed"] for e in x["edges"]]), axis=1
     )
     # static travel time statistic
-    y = np.load(PROCESSED + "/" + args.city + "/y_eta.npz")["arr_0"]
+    y = np.load(PROCESSED / args.city / "y_eta.npz")["arr_0"]
     y = np.reshape(y, (-1, len(df_static)))
     count_0 = (y <= 1800).astype(int).sum(axis=0)
     count_1 = ((1800 < y) & (y <= 2400)).astype(int).sum(axis=0)
@@ -132,7 +130,7 @@ def get_network_static(args):
     # save static features
     print("Saving static features...")
 
-    df_static.to_parquet(PROCESSED + "/" + args.city + "/x_static_eta.parquet")
+    df_static.to_parquet(PROCESSED / args.city / "x_static_eta.parquet")
 
     print("Compute the allnn statistics...")
     y_mean = np.mean(y, axis=0)
@@ -144,7 +142,7 @@ def get_network_static(args):
     y_max = np.max(y, axis=0)
 
     y_allnn = np.stack((y_mean, y_std, y_25, y_50, y_75, y_min, y_max), axis=1)
-    np.savez_compressed(PROCESSED + "/" + args.city + "/knn_eng_allnn.npz", y_allnn)
+    np.savez_compressed(PROCESSED / args.city / "knn_eng_allnn.npz", y_allnn)
 
 
 if __name__ == "__main__":

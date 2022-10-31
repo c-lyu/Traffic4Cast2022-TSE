@@ -6,17 +6,16 @@ import lightgbm as lgb
 from src.feature_extraction.feature_combination import feature_combine
 from src.utils.load import cfg
 
-CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
 
 city = "london"
 num_t_per_day = 64
 num_val = 0
 
-nan_all = np.load(PROCESSED + "/london/" + "nan_percent_all.npy")
+nan_all = np.load(PROCESSED / city / "nan_percent_all.npy")
 num_missing = nan_all[nan_all > 80].shape[0]
-x_error, x_correct = pd.read_pickle(PROCESSED + "/london/error_index.pckl")
-x_train, y_train, x_test = pd.read_pickle(PROCESSED + "/london/missing_df_p1.pckl")
+x_error, x_correct = pd.read_pickle(PROCESSED / city / "error_index.pckl")
+x_train, y_train, x_test = pd.read_pickle(PROCESSED / city / "missing_df_p1.pckl")
 
 # combine features
 x_train = feature_combine(x_train)
@@ -51,7 +50,7 @@ lgb_model.fit(
     callbacks=[lgb.early_stopping(20, first_metric_only=True), lgb.log_evaluation(10)],
 )
 
-joblib.dump(lgb_model, PROCESSED + "/checkpoints/lgb_full_missing_model_%s.pkl" % city)
+joblib.dump(lgb_model, PROCESSED / "checkpoints" / f"lgb_full_missing_model_{city}.pkl")
 
 y_hat_train = lgb_model.predict(x_train)
 y_hat_train = np.reshape(y_hat_train, (num_missing - num_val, -1))
@@ -62,4 +61,4 @@ y_train = np.reshape(np.array(y_train), (num_missing - num_val, -1))
 y_hat = lgb_model.predict(x_test)
 y_hat = y_hat.reshape((6, -1))
 
-np.savez_compressed(PROCESSED + "/london_missing_y_eta_hat", y_hat)
+np.savez_compressed(PROCESSED / "london_missing_y_eta_hat", y_hat)

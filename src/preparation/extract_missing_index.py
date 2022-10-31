@@ -6,7 +6,6 @@ from src.utils.load import cfg
 
 CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
-SAVE_PROCESSED = PROCESSED / "test_outputs_eta"
 
 cities = ["london", "melbourne", "madrid"]
 num_t_per_day = 64
@@ -17,8 +16,8 @@ week_val = 11
 num_nan_test = []
 num_nan_train = []
 for city in cities:
-    x_test = np.load(PROCESSED + "/" + city + "/X_test.npz")["arr_0"][:100]
-    x_raw = np.load(PROCESSED + "/" + city + "/X_raw.npz")["arr_0"]
+    x_test = np.load(PROCESSED / city / "X_test.npz")["arr_0"][:100]
+    x_raw = np.load(PROCESSED / city / "X_raw.npz")["arr_0"]
     num_nan_city_test = []
     num_nan_city_train = []
     for i in range(len(x_test)):
@@ -47,12 +46,12 @@ city = "london"
 x_error = df_num[df_num[city] > 80].index.to_list()
 x_correct = [i for i in range(100) if i not in x_error]
 
-f = open(PROCESSED + "/" + city + "/" + "error_index.pckl", "wb")
+f = open(PROCESSED / city / "error_index.pckl", "wb")
 pickle.dump([x_error, x_correct], f)
 f.close()
 
 # to ensure that using mean to represent the nan samples useful, all trainning samples should not be nan samples
-x_raw = np.load(PROCESSED + "/" + city + "/" + "X_raw.npz")["arr_0"]
+x_raw = np.load(PROCESSED / city / "X_raw.npz")["arr_0"]
 
 num_nan_raw = []
 for i in range(len(x_raw)):
@@ -62,6 +61,5 @@ for i in range(len(x_raw)):
         / (x_raw[i].shape[0] * x_raw[i].shape[1])
     )
     num_nan_raw.append(nan_percent)
-    print("%d-th sample: %.2f values are nan." % (i, nan_percent))
 num_nan_raw = np.array(num_nan_raw)
-np.save(PROCESSED + "/" + city + "/" + "nan_percent_all", num_nan_raw)
+np.save(PROCESSED / city / "nan_percent_all", num_nan_raw)

@@ -14,8 +14,6 @@ CACHEDIR = cfg["CACHEDIR"]
 PROCESSED = cfg["PROCESSED"]
 SPEED_FOLDER = BASEDIR / "speed_classes"
 
-
-# load data
 cities = ["london", "melbourne", "madrid"]
 
 num_t_per_day = 64  # 6:00-22:00 --> see prepare_train_test_arrays.py
@@ -29,7 +27,8 @@ for city in cities:
         day_t_filter=none_filter,  # <--
         cachedir=CACHEDIR / "processed",
     )
-
+    
+    print('===Processing %s' % city)
     df_edges, df_nodes, _ = load_road_graph(BASEDIR, city)
     df_edges.set_index(["u", "v"], inplace=True)
 
@@ -42,7 +41,7 @@ for city in cities:
         k_end = k + 10 if k + 10 < len(sc_files) else len(sc_files)
         for i in range(k, k_end):
             df_sc = pd.read_parquet(
-                SPEED_FOLDER + "/" + city + "/speed_classes_" + sc_files[i] + ".parquet"
+                SPEED_FOLDER / city / f"speed_classes_{sc_files[i]}.parquet"
             )
             df_sc.set_index(["u", "v"], inplace=True)
             for j in range(start_t, start_t + num_t_per_day):
@@ -57,12 +56,13 @@ for city in cities:
         # col_mean = np.nanmean(x_speed, axis=1)
         # inds = np.where(np.isnan(x_speed))
         # x_speed[inds] = col_mean[inds[0],inds[2]]
-        np.save(PROCESSED + "/" + city + "/" + "x_speed_" + str(k), x_speed)
+        np.save(PROCESSED / city / f"x_speed_{k}.npy", x_speed)
 
     x_speed = []
+    print('\n- combine batches')
     for k in tqdm(range(0, len(sc_files), 10)):
-        x0 = np.load(PROCESSED + "/" + city + "/" + "x_speed_" + str(k) + ".npy")
+        x0 = np.load(PROCESSED / city / f"x_speed_{k}.npy")
         x_speed.append(x0)
-        os.remove(PROCESSED + "/" + city + "/" + "x_speed_" + str(k) + ".npy")
+        os.remove(PROCESSED / city / f"x_speed_{k}.npy")
     x_speed = np.concatenate(x_speed)
-    np.savez_compressed(PROCESSED + "/" + city + "/" + "x_speed", x_speed)
+    np.savez_compressed(PROCESSED / city / "x_speed.npz", x_speed)

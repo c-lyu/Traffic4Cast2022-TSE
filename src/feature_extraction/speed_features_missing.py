@@ -4,7 +4,7 @@ from pathlib import Path
 from tqdm import tqdm
 from sklearn.neighbors import NearestNeighbors
 
-from src.utils.load import load_basedir
+from src.utils.load import cfg
 
 
 def get_class_count_boost(row0):
@@ -29,29 +29,28 @@ def create_features(sg_speed_support, nbrs, k, obj="test"):
     x_knn = np.concatenate((y_mean, y_std), axis=1)
 
     np.savez_compressed(
-        PROCESSED + "/" + city + "/knn_eng_" + obj + "_p1" + str(k) + "_missing.npz",
+        PROCESSED / city / f"knn_eng_{obj}_p1{k}_missing.npz",
         x_knn,
     )
 
 
-BASEDIR = load_basedir("data")
-SPEED_FOLDER = "data/speed_classes"
-CACHEDIR = Path("cache")
-PROCESSED = "processed"
+BASEDIR = cfg["BASEDIR"]
+SPEED_FOLDER = BASEDIR / "speed_classes"
+PROCESSED = cfg["PROCESSED"]
 
 # load data
 city = "london"
 
 print("===Preparing speed features for the samples with high missing rate for london")
 # need to run speed_features_fully.py first
-sg_speed = np.load(PROCESSED + "/" + city + "/x_sg.npz")["arr_0"]
+sg_speed = np.load(PROCESSED / city / "x_sg.npz")["arr_0"]
 
-nan_all = np.load(PROCESSED + "/" + city + "/nan_percent_all.npy")
+nan_all = np.load(PROCESSED / city / "nan_percent_all.npy")
 sg_speed_support = sg_speed[nan_all < 80]
 sg_speed_train = sg_speed[nan_all > 80]
 
-x_error, x_correct = pd.read_pickle(PROCESSED + "/" + city + "/error_index.pckl")
-x_test = np.load(PROCESSED + "/" + city + "/X_test.npz")["arr_0"][:100]
+x_error, x_correct = pd.read_pickle(PROCESSED / city / "error_index.pckl")
+x_test = np.load(PROCESSED / city / "X_test.npz")["arr_0"][:100]
 x_test = np.reshape(x_test, (x_test.shape[0], 4 * x_test.shape[1]))
 x_test_error0 = x_test[x_error]
 mask = ~np.isnan(x_test_error0[0])
@@ -61,10 +60,10 @@ for i in range(len(x_test)):
     x_test_list.append(x_test[i][mask])
 x_test = np.stack(x_test_list)
 
-x_support = np.load(PROCESSED + "/" + city + "/X_support_missing.npz")["arr_0"]
-x_train = np.load(PROCESSED + "/" + city + "/X_train_missing.npz")["arr_0"]
+x_support = np.load(PROCESSED / city / "X_support_missing.npz")["arr_0"]
+x_train = np.load(PROCESSED / city / "X_train_missing.npz")["arr_0"]
 
-y_support = np.load(PROCESSED + "/" + city + "/y_support_eta_missing.npz")["arr_0"]
+y_support = np.load(PROCESSED / city / "y_support_eta_missing.npz")["arr_0"]
 y_support = np.reshape(y_support, (len(x_support), -1))
 
 x_support = np.reshape(x_support, (x_support.shape[0], 4 * x_support.shape[1]))
