@@ -37,7 +37,7 @@ sh run.sh
 
 The model checkpoints are included in the folder `processed/checkpoints`.
 
-| Checkpoints                       | Explanation                                                 |
+| Checkpoints                       | Description                                                 |
 |-----------------------------------|-------------------------------------------------------------|
 | `lgb_1+nr2_model_london.pkl`        | London model with Mahattan and normed Euclidean distance    |
 | `lgb_1+nr2_model_madrid.pkl`        | Madrid model with Mahattan and normed Euclidean distance    |
@@ -67,7 +67,7 @@ See `static_features.py`.
 - Number of oneway edges in the SG
 - Statistics of the speed limits of edges in the SG: mean, std, 25, 50, 75 percentiles, min, max
 - Haversine distance between SG OD
-- For SG i: Shortest/design travel time = $\sum_{j \in SG_i} \frac{\text{length}_j}{\text{MaxSpeed}_j}$
+- For SG $i$: Shortest/design travel time = $\sum_{j \in SG_i} \frac{\text{length}_j}{\text{MaxSpeed}_j}$
 - Statistics of the $y$ values of all samples under consideration (all nn)
 - Percentage of $(- \infty, 1800]$, $(1800, 2400]$ and $(2400, \infty)$ in the y query set for each SG
 
